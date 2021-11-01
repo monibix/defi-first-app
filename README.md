@@ -1,1 +1,1 @@
-# First Defi Staking App
+# Defi Staking App
