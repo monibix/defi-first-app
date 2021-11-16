@@ -59,11 +59,44 @@ contract('DecentralBank', ([owner, customer]) => {
             // Check Investor Balance
             result = await tether.balanceOf(customer)
             assert.equal(result.toString(), tokens('100'), 'customer mock wallet balance before staking')
-            
-            // Check Staking For Customer of 100 tokens
-            await tether.approve(decentralBank.address, tokens('100'), {from: customer})
-            await decentralBank.depositTokens(tokens('100'), {from: customer})
 
+            //Check Staking From Costumer
+            await tether.approve(decentralBank.address, tokens('100'), {from: customer})
+            await decentralBank.depositTokens(tokens('100'), {from: customer}) //Returned Error: VM Exception while processing transaction: revert
+
+            //Check Updated Balance of Customer
+            result = await tether.balanceOf(customer)
+            assert.equal(result.toString(), tokens('0'), 'customer mock wallet balance after staking 100 tokens')
+
+            //Check Updated Balance of Decentral Bank
+            result = await tether.balanceOf(decentralBank.address)
+            assert.equal(result.toString(), tokens('100'), 'decentral bank mock wallet balance after staking')
+
+            //Is staking Update
+            result = await decentralBank.isStaking(customer)
+            assert.equal(result.toString(), 'true', 'customer is staking status after staking')  
+
+            //Issue tokens
+            await decentralBank.issueTokens({from: owner})
+
+            //Ensure only the owner can issue tokens
+            await decentralBank.issueTokens({from: customer}).should.be.rejected;
+
+            //Unstake tokens
+            await decentralBank.unstakeTokens({from: customer})
+
+            //Check unstaking balances
+
+            result = await tether.balanceOf(customer)
+            assert.equal(result.toString(), tokens('100'), 'customer mock wallet balance after unstaking')
+
+            //Check Updated Balance of Decentral Bank
+            result = await tether.balanceOf(decentralBank.address)
+            assert.equal(result.toString(), tokens('0'), 'decentral bank mock wallet balance after staking')
+
+            //Is staking Update
+            result = await decentralBank.isStaking(customer)
+            assert.equal(result.toString(), 'false', 'customer is no longer staking after unstaking')   
         })
     })
     
