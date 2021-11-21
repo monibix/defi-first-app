@@ -8,19 +8,13 @@ import Main from './Main';
 
 class App extends Component {
     
-    
-
     async UNSAFE_componentWillMount() {
         await this.loadWeb3()
         await this.loadBlockchainData()
     }
     //this async function connects the app to the blockchain
     async loadWeb3() {
-
-        console.log("window.eteherem", window)
-
         if(window.ethereum) {
-            console.log("first if")
             window.web3 = new Web3(window.ethereum)
             await window.ethereum.enable()
         }
@@ -39,7 +33,6 @@ class App extends Component {
         const networkId = await web3.eth.net.getId()
         //Load Tether Contract
         let tetherData = Tether.networks[networkId]
-        console.log("tetherData", tetherData)
         if (tetherData) {
             const tether = new web3.eth.Contract(Tether.abi, tetherData.address)
             this.setState({tether: tether})
@@ -88,14 +81,20 @@ class App extends Component {
     
 
     render() {
+        console.log("LOADING", this.state.loading)
+        console.log("this.state", this.state)
+        let content;
+        this.state.loading ? content =
+        <p id="loader" className="text-center" style={{margin: '30px'}}>
+        Loading please...</p> : content = <Main />
         return (
             <div>
                 <Navbar account={this.state.account}></Navbar>
                 <div className="container-fluid mt-5">
-                    <div className="row">
+                    <div className="row content">
                         <main role="main" className="col-lg-12 ml-auto mr-auto" style={{maxWidth: '600px', minHeight: '100vm'}} >
                             <div>
-                                <Main />
+                                {content}
                             </div>
                         </main>
                     </div>
