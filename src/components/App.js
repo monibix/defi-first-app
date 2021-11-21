@@ -17,6 +17,7 @@ class App extends Component {
         if(window.ethereum) {
             window.web3 = new Web3(window.ethereum)
             await window.ethereum.enable()
+            console.log("metamask connected")
         }
         else if (window.web3) {
           window.web3 = new Web3(window.web3.currentProvider)
@@ -64,6 +65,23 @@ class App extends Component {
         this.setState({loading: false})
     }
 
+    stakeTokens = (amount) => {
+        this.setState({loading: true })
+        this.state.tether.methods.approve(this.state.decentralBank._address, amount).send({from: this.state.account}).on('transactionHash', (hash) => {
+          this.state.decentralBank.methods.depositTokens(amount).send({from: this.state.account}).on('transactionHash', (hash) => {
+            this.setState({loading:false})
+          })
+        }) 
+    }
+
+    unstakeTokens = () => {
+    this.setState({loading: true })
+    this.state.decentralBank.methods.unstakeTokens().send({from: this.state.account}).on('transactionHash', (hash) => {
+        this.setState({loading:false})
+    }) 
+    }
+
+
     constructor(props) {
         super(props)
         this.state = {
@@ -75,7 +93,7 @@ class App extends Component {
             tetherBalance: '0',
             rwdBalance: '0', 
             stakingBalance: '0', 
-            loading: true //for a better UX 
+            loading: false //for a better UX 
         }
     }
     
@@ -86,7 +104,13 @@ class App extends Component {
         let content;
         this.state.loading ? content =
         <p id="loader" className="text-center" style={{margin: '30px'}}>
-        Loading please...</p> : content = <Main />
+        Loading please...</p> : content = <Main 
+        tetherBalance ={this.state.tetherBalance}
+        rwdBalance ={this.state.rwdBalance}
+        stakingBalance ={this.state.stakingBalance}
+        stakeTokens={this.stakeTokens}
+        unstakeTokens = {this.unstakeTokens}
+         />
         return (
             <div>
                 <Navbar account={this.state.account}></Navbar>
